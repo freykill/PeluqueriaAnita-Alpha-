@@ -1,0 +1,62 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Cliente {
+  id            Int       @id @default(autoincrement())
+  nombre        String
+  apellido      String
+  telefono      String
+  email         String?   @unique
+  direccion     String?
+  fechaRegistro DateTime  @default(now())
+  citas         Cita[]    // Relación con Citas
+
+  @@map("clientes") // Mapea el nombre del modelo a "clientes" en la base de datos
+}
+
+model Cita {
+  id            Int       @id @default(autoincrement())
+  clienteId     Int
+  fechaCita     DateTime
+  estado        String
+  fechaCreacion DateTime  @default(now())
+  cliente       Cliente   @relation(fields: [clienteId], references: [id])
+  atenciones    Atencion[]
+
+  @@map("citas")
+}
+
+model Atencion {
+  id             Int       @id @default(autoincrement())
+  citaId         Int
+  servicio       String
+  precio         Float
+  duracion       Int?      // Duración en minutos, opcional
+  fechaAtencion  DateTime  @default(now())
+  cita           Cita      @relation(fields: [citaId], references: [id])
+
+  @@map("atenciones")
+}
+
+model Usuario {
+  id            Int       @id @default(autoincrement())
+  nombreUsuario String
+  email         String    @unique
+  passwordHash  String
+  rol           String
+  fechaRegistro DateTime  @default(now())
+
+  @@map("usuarios")
+}
